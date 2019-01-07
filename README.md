@@ -6,7 +6,8 @@ Provides USPS shipping rates for Drupal Commerce.
 ## Development Setup
 
 
-1. Use [Composer](https://getcomposer.org/) to get Commerce USPS with all dependencies: `composer require drupal/commerce_usps`
+1. Use [Composer](https://getcomposer.org/) to get Commerce USPS
+ with all dependencies: `composer require drupal/commerce_usps`
 
 2. Enable module.
 
