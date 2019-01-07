@@ -9,7 +9,6 @@ use Drupal\commerce_usps\USPSRateRequestInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-
 /**
  * Provides the USPS shipping method.
  *
@@ -107,7 +106,7 @@ class USPS extends ShippingMethodBase {
    *
    * See https://www.drupal.org/node/2904467 for more information.
    *
-   * @TODO: Remove once core issue has been addressed.
+   * TODO: Remove once core issue has been addressed.
    *
    * @param array $plugin_definition
    *   The plugin definition provided to the class.
@@ -259,4 +258,3 @@ class USPS extends ShippingMethodBase {
   }
 
 }
-
