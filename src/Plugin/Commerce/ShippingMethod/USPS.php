@@ -62,13 +62,7 @@ class USPS extends ShippingMethodBase {
    * @param \Drupal\commerce_usps\USPSRateRequestInterface $usps_rate_request
    *   The rate request service.
    */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    PackageTypeManagerInterface $package_type_manager,
-    USPSRateRequestInterface $usps_rate_request
-  ) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PackageTypeManagerInterface $package_type_manager, USPSRateRequestInterface $usps_rate_request) {
     // Rewrite the service keys to be integers.
     $plugin_definition = $this->preparePluginDefinition($plugin_definition);
 
@@ -86,12 +80,7 @@ class USPS extends ShippingMethodBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(
-    ContainerInterface $container,
-    array $configuration,
-    $plugin_id,
-    $plugin_definition
-  ) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration,
       $plugin_id,
