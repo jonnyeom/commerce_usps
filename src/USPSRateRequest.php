@@ -50,9 +50,7 @@ class USPSRateRequest extends USPSRequest implements USPSRateRequestInterface {
    * @param \Drupal\commerce_usps\USPSShipmentInterface $usps_shipment
    *   The USPS shipment object.
    */
-  public function __construct(
-    USPSShipmentInterface $usps_shipment
-  ) {
+  public function __construct(USPSShipmentInterface $usps_shipment) {
     $this->uspsShipment = $usps_shipment;
   }
 
