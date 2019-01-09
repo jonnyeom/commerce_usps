@@ -22,12 +22,4 @@ interface USPSRateRequestInterface {
    */
   public function getRates(ShipmentInterface $commerce_shipment);
 
-  /**
-   * Checks the delivery date of a USPS shipment.
-   *
-   * @return array
-   *   The delivery rate response.
-   */
-  public function checkDeliveryDate();
-
 }
