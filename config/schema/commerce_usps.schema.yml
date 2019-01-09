@@ -18,6 +18,9 @@ commerce_shipping.commerce_shipping_method.plugin.usps:
       type: mapping
       label: 'USPS Options'
       mapping:
+        tracking_url:
+          type: string
+          label: 'Tracking URL'
         log:
           type: mapping
           label: 'Log the following messages for debugging'

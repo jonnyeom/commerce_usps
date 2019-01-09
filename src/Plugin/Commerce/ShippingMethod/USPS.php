@@ -5,6 +5,7 @@ namespace Drupal\commerce_usps\Plugin\Commerce\ShippingMethod;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\PackageTypeManagerInterface;
 use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
+use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\SupportsTrackingInterface;
 use Drupal\commerce_usps\USPSRateRequestInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -39,7 +40,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *  }
  * )
  */
-class USPS extends ShippingMethodBase {
+class USPS extends ShippingMethodBase implements SupportsTrackingInterface {
 
   /**
    * The USPSRateRequest class.
@@ -130,6 +131,7 @@ class USPS extends ShippingMethodBase {
         'mode' => 'test',
       ],
       'options' => [
+        'tracking_url' => 'https://tools.usps.com/go/TrackConfirmAction?tLabels=[tracking_code]',
         'log' => [],
       ],
     ] + parent::defaultConfiguration();
@@ -190,6 +192,13 @@ class USPS extends ShippingMethodBase {
       '#description' => $this->t('Additional options for USPS'),
     ];
 
+    $form['options']['tracking_url'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Tracking URL base'),
+      '#description' => $this->t('The base URL for assembling a tracking URL. If the [tracking_code] token is omitted, the code will be appended to the end of the URL (e.g. "https://tools.usps.com/go/TrackConfirmAction?tLabels=123456789")'),
+      '#default_value' => $this->configuration['options']['tracking_url'],
+    ];
+
     $form['options']['log'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Log the following messages for debugging'),
@@ -228,6 +237,32 @@ class USPS extends ShippingMethodBase {
     }
 
     return $this->uspsRateService->getRates($shipment);
+  }
+
+  /**
+   * Returns a tracking URL for USPS shipments.
+   *
+   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
+   *   The commerce shipment.
+   *
+   * @return mixed
+   *   The URL object or FALSE.
+   */
+  public function getTrackingUrl(ShipmentInterface $shipment) {
+    $code = $shipment->getTrackingCode();
+    if (!empty($code)) {
+      // If the tracking code token exists, replace it with the code.
+      if (strstr($this->configuration['options']['tracking_url'], '[tracking_code]')) {
+        $url = str_replace('[tracking_code]', $code, $this->configuration['options']['tracking_url']);
+      }
+      else {
+        // Otherwise, append the tracking code to the end of the URL.
+        $url = $this->configuration['options']['tracking_url'] . $code;
+      }
+
+      return Url::fromUri($url);
+    }
+    return FALSE;
   }
 
   /**
