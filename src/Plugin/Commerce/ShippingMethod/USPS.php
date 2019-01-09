@@ -8,6 +8,7 @@ use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
 use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\SupportsTrackingInterface;
 use Drupal\commerce_usps\USPSRateRequestInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,26 +18,27 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *  id = "usps",
  *  label = @Translation("USPS"),
  *  services = {
- *    "_1" = @translation("Priority Mail 1-Day"),
- *    "_17" = @translation("Priority Mail 1-Day Medium Flat Rate Box"),
- *    "_22" = @translation("Priority Mail 1-Day Large Flat Rate Box"),
- *    "_28" = @translation("Priority Mail 1-Day Small Flat Rate Box"),
- *    "_16" = @translation("Priority Mail 1-Day Flat Rate Envelope"),
- *    "_38" = @translation("Priority Mail 1-Day Gift Card Flat Rate Envelope"),
- *    "_44" = @translation("Priority Mail 1-Day Legal Flat Rate Envelope"),
- *    "_29" = @translation("Priority Mail 1-Day Padded Flat Rate Envelope"),
- *    "_42" = @translation("Priority Mail 1-Day Small Flat Rate Envelope"),
- *    "_40" = @translation("Priority Mail 1-Day Window Flat Rate Envelope"),
- *    "_3" = @translation("Priority Mail Express 2-Day"),
+ *    "_1" = @translation("Priority Mail 2-Day"),
  *    "_2" = @translation("Priority Mail Express 2-Day Hold For Pickup"),
+ *    "_3" = @translation("Priority Mail Express 2-Day"),
+ *    "_4" = @translation("USPS Retail Ground"),
+ *    "_6" = @translation("Media Mail Parcel"),
+ *    "_7" = @translation("Library Mail Parcel"),
  *    "_13" = @translation("Priority Mail Express 2-Day Flat Rate Envelope"),
+ *    "_16" = @translation("Priority Mail 2-Day Flat Rate Envelope"),
+ *    "_17" = @translation("Priority Mail 2-Day Medium Flat Rate Box"),
+ *    "_22" = @translation("Priority Mail 2-Day Large Flat Rate Box"),
  *    "_27" = @translation("Priority Mail Express 2-Day Flat Rate Envelope Hold For Pickup"),
+ *    "_28" = @translation("Priority Mail 2-Day Small Flat Rate Box"),
+ *    "_29" = @translation("Priority Mail 1-Day Padded Flat Rate Envelope"),
  *    "_30" = @translation("Priority Mail Express 2-Day Legal Flat Rate Envelope"),
  *    "_31" = @translation("Priority Mail Express 2-Day Legal Flat Rate Envelope Hold For Pickup"),
+ *    "_38" = @translation("Priority Mail 2-Day Gift Card Flat Rate Envelope"),
+ *    "_40" = @translation("Priority Mail 2-Day Window Flat Rate Envelope"),
+ *    "_42" = @translation("Priority Mail 1-Day Small Flat Rate Envelope"),
+ *    "_44" = @translation("Priority Mail 2-Day Legal Flat Rate Envelope"),
  *    "_62" = @translation("Priority Mail Express 2-Day Padded Flat Rate Envelope"),
  *    "_63" = @translation("Priority Mail Express 2-Day Padded Flat Rate Envelope Hold For Pickup"),
- *    "_7" = @translation("Library Mail Parcel"),
- *    "_6" = @translation("Media Mail Parcel"),
  *  }
  * )
  */
@@ -94,10 +96,6 @@ class USPS extends ShippingMethodBase implements SupportsTrackingInterface {
   /**
    * Prepares the service array keys to support integer values.
    *
-   * See https://www.drupal.org/node/2904467 for more information.
-   *
-   * TODO: Remove once core issue has been addressed.
-   *
    * @param array $plugin_definition
    *   The plugin definition provided to the class.
    *
@@ -110,12 +108,19 @@ class USPS extends ShippingMethodBase implements SupportsTrackingInterface {
     unset($plugin_definition['services']);
 
     // Loop over each service definition and redefine them with
-    // integer keys that match the USPS API.
+    // integer keys that match the UPS API.
+    // TODO: Remove once core issue has been addressed.
+    // See: https://www.drupal.org/node/2904467 for more information.
     foreach ($services as $key => $service) {
       // Remove the "_" from the service key.
       $key_trimmed = str_replace('_', '', $key);
       $plugin_definition['services'][$key_trimmed] = $service;
     }
+
+    // Sort the options alphabetically.
+    uasort($plugin_definition['services'], function (TranslatableMarkup $a, TranslatableMarkup $b) {
+      return $a->getUntranslatedString() < $b->getUntranslatedString() ? -1 : 1;
+    });
 
     return $plugin_definition;
   }
