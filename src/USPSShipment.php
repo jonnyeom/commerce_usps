@@ -11,21 +11,7 @@ use USPS\RatePackage;
  *
  * @package Drupal\commerce_usps
  */
-class USPSShipment implements USPSShipmentInterface {
-
-  /**
-   * The commerce shipment entity.
-   *
-   * @var \Drupal\commerce_shipping\Entity\ShipmentInterface
-   */
-  protected $commerceShipment;
-
-  /**
-   * The USPS rate package entity.
-   *
-   * @var \USPS\RatePackage
-   */
-  protected $uspsPackage;
+class USPSShipment extends USPSShipmentBase implements USPSShipmentInterface {
 
   /**
    * Returns an initialized rate package object.
@@ -37,14 +23,14 @@ class USPSShipment implements USPSShipmentInterface {
    *   The rate package entity.
    */
   public function getPackage(ShipmentInterface $commerce_shipment) {
-    $this->commerceShipment = $commerce_shipment;
-    $this->uspsPackage = new RatePackage();
+    parent::getPackage($commerce_shipment);
 
     $this->setService();
     $this->setShipFrom();
     $this->setShipTo();
     $this->setWeight();
     $this->setContainer();
+    $this->setDimensions();
     $this->setPackageSize();
     $this->setExtraOptions();
 
@@ -87,20 +73,6 @@ class USPSShipment implements USPSShipmentInterface {
    */
   protected function setPackageSize() {
     $this->uspsPackage->setSize(RatePackage::SIZE_REGULAR);
-  }
-
-  /**
-   * Sets the package weight.
-   */
-  protected function setWeight() {
-    $weight = $this->commerceShipment->getWeight();
-
-    if ($weight->getNumber() > 0) {
-      $ounces = $weight->convert('oz')->getNumber();
-
-      $this->uspsPackage->setPounds(floor($ounces / 16));
-      $this->uspsPackage->setOunces($ounces % 16);
-    }
   }
 
   /**

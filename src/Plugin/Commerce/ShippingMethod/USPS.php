@@ -3,9 +3,6 @@
 namespace Drupal\commerce_usps\Plugin\Commerce\ShippingMethod;
 
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
-use Drupal\commerce_shipping\PackageTypeManagerInterface;
-use Drupal\commerce_usps\USPSRateRequestInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Provides the USPS shipping method.
@@ -41,26 +38,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 class USPS extends USPSBase {
 
   /**
-   * Constructs a new ShippingMethodBase object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\commerce_shipping\PackageTypeManagerInterface $package_type_manager
-   *   The package type manager.
-   * @param \Drupal\commerce_usps\USPSRateRequestInterface $usps_rate_request
-   *   The rate request service.
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, PackageTypeManagerInterface $package_type_manager, USPSRateRequestInterface $usps_rate_request) {
-    // Rewrite the service keys to be integers.
-    $plugin_definition = $this->preparePluginDefinition($plugin_definition);
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $package_type_manager, $usps_rate_request);
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function calculateRates(ShipmentInterface $shipment) {
@@ -69,39 +46,15 @@ class USPS extends USPSBase {
       return [];
     }
 
-    return $this->uspsRateService->getRates($shipment);
-  }
-
-  /**
-   * Prepares the service array keys to support integer values.
-   *
-   * @param array $plugin_definition
-   *   The plugin definition provided to the class.
-   *
-   * @return array
-   *   The prepared plugin definition.
-   */
-  private function preparePluginDefinition(array $plugin_definition) {
-    // Cache and unset the parsed plugin definitions for services.
-    $services = $plugin_definition['services'];
-    unset($plugin_definition['services']);
-
-    // Loop over each service definition and redefine them with
-    // integer keys that match the UPS API.
-    // TODO: Remove once core issue has been addressed.
-    // See: https://www.drupal.org/node/2904467 for more information.
-    foreach ($services as $key => $service) {
-      // Remove the "_" from the service key.
-      $key_trimmed = str_replace('_', '', $key);
-      $plugin_definition['services'][$key_trimmed] = $service;
+    // Only attempt to collect rates for US addresses.
+    if ($shipment->getShippingProfile()->get('address')->country_code != 'US') {
+      return [];
     }
 
-    // Sort the options alphabetically.
-    uasort($plugin_definition['services'], function (TranslatableMarkup $a, TranslatableMarkup $b) {
-      return $a->getUntranslatedString() < $b->getUntranslatedString() ? -1 : 1;
-    });
+    // Make sure a package type is set on the shipment.
+    $this->setPackageType($shipment);
 
-    return $plugin_definition;
+    return $this->uspsRateService->getRates($shipment);
   }
 
 }

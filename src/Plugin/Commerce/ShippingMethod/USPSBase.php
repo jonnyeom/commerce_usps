@@ -8,9 +8,10 @@ use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\ShippingMethodBase;
 use Drupal\commerce_shipping\Plugin\Commerce\ShippingMethod\SupportsTrackingInterface;
 use Drupal\commerce_usps\USPSRateRequestInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class USPSBase extends ShippingMethodBase implements SupportsTrackingInterface {
+abstract class USPSBase extends ShippingMethodBase implements SupportsTrackingInterface {
 
   /**
    * The USPSRateRequest class.
@@ -34,6 +35,7 @@ class USPSBase extends ShippingMethodBase implements SupportsTrackingInterface {
    *   The rate request service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, PackageTypeManagerInterface $package_type_manager, USPSRateRequestInterface $usps_rate_request) {
+    $plugin_definition = $this->preparePluginDefinition($plugin_definition);
     parent::__construct($configuration, $plugin_id, $plugin_definition, $package_type_manager);
 
     $this->uspsRateService = $usps_rate_request;
@@ -161,11 +163,47 @@ class USPSBase extends ShippingMethodBase implements SupportsTrackingInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Prepares the service array keys to support integer values.
+   *
+   * @param array $plugin_definition
+   *   The plugin definition provided to the class.
+   *
+   * @return array
+   *   The prepared plugin definition.
    */
-  public function calculateRates(ShipmentInterface $shipment) {
-    // This base class doesn't collect rates.
-    return [];
+  private function preparePluginDefinition(array $plugin_definition) {
+    // Cache and unset the parsed plugin definitions for services.
+    $services = $plugin_definition['services'];
+    unset($plugin_definition['services']);
+
+    // Loop over each service definition and redefine them with
+    // integer keys that match the UPS API.
+    // TODO: Remove once core issue has been addressed.
+    // See: https://www.drupal.org/node/2904467 for more information.
+    foreach ($services as $key => $service) {
+      // Remove the "_" from the service key.
+      $key_trimmed = str_replace('_', '', $key);
+      $plugin_definition['services'][$key_trimmed] = $service;
+    }
+
+    // Sort the options alphabetically.
+    uasort($plugin_definition['services'], function (TranslatableMarkup $a, TranslatableMarkup $b) {
+      return $a->getUntranslatedString() < $b->getUntranslatedString() ? -1 : 1;
+    });
+
+    return $plugin_definition;
+  }
+
+  /**
+   * Ensure a package type exists on the shipment.
+   *
+   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
+   *   The commerce shipment entity.
+   */
+  protected function setPackageType(ShipmentInterface $shipment) {
+    if (!$shipment->getPackageType()) {
+      $shipment->setPackageType($this->getDefaultPackageType());
+    }
   }
 
   /**

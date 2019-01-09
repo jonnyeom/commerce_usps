@@ -77,7 +77,9 @@ class USPSRateRequestBase extends USPSRequest {
   protected function cleanServiceName($service) {
     // Remove the html encoded trademark markup since it's
     // not supported in radio labels.
-    return str_replace('&lt;sup&gt;&#8482;&lt;/sup&gt;', '', $service);
+    $service = str_replace('&lt;sup&gt;&#8482;&lt;/sup&gt;', '', $service);
+    $service = str_replace('&lt;sup&gt;&#174;&lt;/sup&gt;', '', $service);
+    return $service;
   }
 
 }
