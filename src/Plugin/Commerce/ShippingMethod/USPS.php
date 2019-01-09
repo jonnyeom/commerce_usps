@@ -110,7 +110,7 @@ class USPS extends ShippingMethodBase implements SupportsTrackingInterface {
     unset($plugin_definition['services']);
 
     // Loop over each service definition and redefine them with
-    // integer keys that match the UPS API.
+    // integer keys that match the USPS API.
     foreach ($services as $key => $service) {
       // Remove the "_" from the service key.
       $key_trimmed = str_replace('_', '', $key);
