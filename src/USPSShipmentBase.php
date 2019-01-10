@@ -3,6 +3,9 @@
 namespace Drupal\commerce_usps;
 
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_usps\Event\USPSEvents;
+use Drupal\commerce_usps\Event\USPSShipmentEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use USPS\RatePackage;
 
 /**
@@ -11,6 +14,13 @@ use USPS\RatePackage;
  * @package Drupal\commerce_usps
  */
 class USPSShipmentBase implements USPSShipmentInterface {
+
+  /**
+   * Event disptcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
 
   /**
    * The commerce shipment entity.
@@ -27,7 +37,17 @@ class USPSShipmentBase implements USPSShipmentInterface {
   protected $uspsPackage;
 
   /**
-   * Get the USPS RatePackage object.
+   * USPSShipmentBase constructor.
+   *
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   *   The event dispatcher.
+   */
+  public function __construct(EventDispatcherInterface $eventDispatcher) {
+    $this->eventDispatcher = $eventDispatcher;
+  }
+
+  /**
+   * Get the RatePackage object.
    *
    * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
    *   The commerce shipment entity.
@@ -37,6 +57,31 @@ class USPSShipmentBase implements USPSShipmentInterface {
    */
   public function getPackage(ShipmentInterface $commerce_shipment) {
     $this->commerceShipment = $commerce_shipment;
+
+    if (!$this->uspsPackage) {
+      $this->buildPackage($commerce_shipment);
+      $this->alterPackage();
+    }
+
+    return $this->uspsPackage;
+  }
+
+  /**
+   * Allow rate to be altered.
+   */
+  public function alterPackage() {
+    // Allow other modules to alter the rate request before it's submitted.
+    $shipment_event = new USPSShipmentEvent($this->uspsPackage, $this->commerceShipment);
+    $this->eventDispatcher->dispatch(USPSEvents::AFTER_BUILD_SHIPMENT, $shipment_event);
+  }
+
+  /**
+   * Get the USPS RatePackage object.
+   *
+   * @return \USPS\RatePackage
+   *   The RatePackage object.
+   */
+  public function buildPackage() {
     $this->uspsPackage = new RatePackage();
     return $this->uspsPackage;
   }

@@ -14,6 +14,10 @@ interface USPSShipmentInterface {
   /**
    * Returns an initialized rate package object.
    *
+   * This method should invoke ::buildPackage and
+   * ::alterPackage before returning the RatePackage
+   * object.
+   *
    * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
    *   A Drupal Commerce shipment entity.
    *
@@ -21,5 +25,15 @@ interface USPSShipmentInterface {
    *   The rate package entity.
    */
   public function getPackage(ShipmentInterface $commerce_shipment);
+
+  /**
+   * Build the RatePackage.
+   */
+  public function buildPackage();
+
+  /**
+   * Alter the RatePackage.
+   */
+  public function alterPackage();
 
 }

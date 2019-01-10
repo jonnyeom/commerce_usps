@@ -22,4 +22,25 @@ interface USPSRateRequestInterface {
    */
   public function getRates(ShipmentInterface $commerce_shipment);
 
+  /**
+   * Build the rate object.
+   */
+  public function buildRate();
+
+  /**
+   * Alter the rate object.
+   */
+  public function alterRate();
+
+  /**
+   * Parse the rate response and return shipping rates.
+   *
+   * @param array $response
+   *   The USPS RateRequest response as an array.
+   *
+   * @return array
+   *   Returns an array of ShippingRate objects
+   */
+  public function resolveRates(array $response);
+
 }

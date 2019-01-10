@@ -3,10 +3,8 @@
 namespace Drupal\commerce_usps;
 
 use Drupal\commerce_price\Price;
-use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use Drupal\commerce_shipping\ShippingRate;
 use Drupal\commerce_shipping\ShippingService;
-use USPS\Rate;
 
 /**
  * Class USPSRateRequest.
@@ -16,33 +14,16 @@ use USPS\Rate;
 class USPSRateRequestInternational extends USPSRateRequestBase implements USPSRateRequestInterface {
 
   /**
-   * Fetch rates from the USPS API.
+   * Resolve the rates from the RateRequest response.
    *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
-   *   The commerce shipment.
-   *
-   * @throws \Exception
-   *   Exception when required properties are missing.
+   * @param array $response
+   *   The rate request array.
    *
    * @return array
-   *   An array of ShippingRate objects.
+   *   An array of ShippingRates or an empty array.
    */
-  public function getRates(ShipmentInterface $commerce_shipment) {
-    // Validate a commerce shipment has been provided.
-    if (empty($commerce_shipment)) {
-      throw new \Exception('Shipment not provided');
-    }
-
+  public function resolveRates(array $response) {
     $rates = [];
-
-    // Set the necessary info needed for the request.
-    $this->commerceShipment = $commerce_shipment;
-    $this->initRequest();
-
-    // Fetch the rates.
-    $this->uspsRequest->getRate();
-    $response = $this->uspsRequest->getArrayResponse();
-
     // Parse the rate response and create shipping rates array.
     if (!empty($response['IntlRateV2Response']['Package']['Service'])) {
       foreach ($response['IntlRateV2Response']['Package']['Service'] as $service) {
@@ -74,13 +55,12 @@ class USPSRateRequestInternational extends USPSRateRequestBase implements USPSRa
   /**
    * Initialize the rate request object needed for the USPS API.
    */
-  protected function initRequest() {
-    $this->uspsRequest = new Rate(
-      $this->configuration['api_information']['user_id']
-    );
+  public function buildRate() {
+    // Invoke the parent to initialize the uspsRequest.
+    parent::buildRate();
+
     $this->uspsRequest->setInternationalCall(TRUE);
     $this->uspsRequest->addExtraOption('Revision', 2);
-    $this->setMode();
 
     // Add each package to the request.
     // Todo: IntlRateV2 is limited to 25 packages per txn.

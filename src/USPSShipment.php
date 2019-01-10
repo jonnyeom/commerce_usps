@@ -2,7 +2,6 @@
 
 namespace Drupal\commerce_usps;
 
-use Drupal\commerce_shipping\Entity\ShipmentInterface;
 use USPS\Address;
 use USPS\RatePackage;
 
@@ -16,14 +15,11 @@ class USPSShipment extends USPSShipmentBase implements USPSShipmentInterface {
   /**
    * Returns an initialized rate package object.
    *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
-   *   A Drupal Commerce shipment entity.
-   *
    * @return \USPS\RatePackage
    *   The rate package entity.
    */
-  public function getPackage(ShipmentInterface $commerce_shipment) {
-    parent::getPackage($commerce_shipment);
+  public function buildPackage() {
+    parent::buildPackage();
 
     $this->setService();
     $this->setShipFrom();

@@ -2,12 +2,18 @@
 
 namespace Drupal\commerce_usps;
 
+use Drupal\commerce_shipping\Entity\ShipmentInterface;
+use Drupal\commerce_usps\Event\USPSEvents;
+use Drupal\commerce_usps\Event\USPSRateRequestEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use USPS\Rate;
+
 /**
  * Class USPSRateRequest.
  *
  * @package Drupal\commerce_usps
  */
-class USPSRateRequestBase extends USPSRequest {
+abstract class USPSRateRequestBase extends USPSRequest implements USPSRateRequestInterface {
 
   /**
    * The commerce shipment entity.
@@ -38,13 +44,86 @@ class USPSRateRequestBase extends USPSRequest {
   protected $uspsShipment;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * USPSRateRequest constructor.
    *
-   * @param \Drupal\commerce_usps\USPSShipmentInterface $usps_shipment
+   * @param \Drupal\commerce_usps\USPSShipmentInterface $uspsShipment
    *   The USPS shipment object.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   *   The event dispatcher.
    */
-  public function __construct(USPSShipmentInterface $usps_shipment) {
-    $this->uspsShipment = $usps_shipment;
+  public function __construct(USPSShipmentInterface $uspsShipment, EventDispatcherInterface $eventDispatcher) {
+    $this->uspsShipment = $uspsShipment;
+    $this->eventDispatcher = $eventDispatcher;
+  }
+
+  /**
+   * Fetch rates from the USPS API.
+   *
+   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
+   *   The commerce shipment.
+   *
+   * @throws \Exception
+   *   Exception when required properties are missing.
+   *
+   * @return array
+   *   An array of ShippingRate objects.
+   */
+  public function getRates(ShipmentInterface $commerce_shipment) {
+    // Validate a commerce shipment has been provided.
+    if (empty($commerce_shipment)) {
+      throw new \Exception('Shipment not provided');
+    }
+
+    // Set the necessary info needed for the request.
+    $this->setShipment($commerce_shipment);
+
+    // Build the rate request.
+    $this->buildRate();
+
+    // Allow others to alter the rate.
+    $this->alterRate();
+
+    // Fetch the rates.
+    $this->uspsRequest->getRate();
+    $response = $this->uspsRequest->getArrayResponse();
+
+    return $this->resolveRates($response);
+  }
+
+  /**
+   * Build the rate request.
+   */
+  public function buildRate() {
+    $this->uspsRequest = new Rate(
+      $this->configuration['api_information']['user_id']
+    );
+    $this->setMode();
+  }
+
+  /**
+   * Allow rate to be altered.
+   */
+  public function alterRate() {
+    // Allow other modules to alter the rate request before it's submitted.
+    $rateRequestEvent = new USPSRateRequestEvent($this->uspsRequest, $this->commerceShipment);
+    $this->eventDispatcher->dispatch(USPSEvents::BEFORE_RATE_REQUEST, $rateRequestEvent);
+  }
+
+  /**
+   * Set the commerce shipment.
+   *
+   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
+   *   The commerce shipment entity.
+   */
+  protected function setShipment(ShipmentInterface $commerce_shipment) {
+    $this->commerceShipment = $commerce_shipment;
   }
 
   /**

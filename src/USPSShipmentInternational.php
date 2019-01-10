@@ -2,8 +2,6 @@
 
 namespace Drupal\commerce_usps;
 
-use Drupal\commerce_shipping\Entity\ShipmentInterface;
-
 /**
  * Class that sets the shipment details needed for the USPS request.
  *
@@ -14,14 +12,11 @@ class USPSShipmentInternational extends USPSShipmentBase implements USPSShipment
   /**
    * Returns an initialized rate package object.
    *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
-   *   A Drupal Commerce shipment entity.
-   *
    * @return \USPS\RatePackage
    *   The rate package entity.
    */
-  public function getPackage(ShipmentInterface $commerce_shipment) {
-    parent::getPackage($commerce_shipment);
+  public function buildPackage() {
+    parent::buildPackage();
 
     // Object has to be created in exact order defined
     // by IntlRateV2 API.
