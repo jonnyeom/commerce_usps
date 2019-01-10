@@ -93,15 +93,15 @@ class USPSRateRequest extends USPSRateRequestBase implements USPSRateRequestInte
   /**
    * Utility function to translate service labels.
    *
-   * @param string $serviceCode
+   * @param string $service_code
    *   The service code.
    *
    * @return string
    *   The translated service code.
    */
-  protected function translateServiceLables($serviceCode) {
+  protected function translateServiceLables($service_code) {
     $label = '';
-    if (strtolower($serviceCode) == 'parcel') {
+    if (strtolower($service_code) == 'parcel') {
       $label = 'ground';
     }
 

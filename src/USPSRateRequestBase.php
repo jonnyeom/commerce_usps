@@ -53,14 +53,14 @@ abstract class USPSRateRequestBase extends USPSRequest implements USPSRateReques
   /**
    * USPSRateRequest constructor.
    *
-   * @param \Drupal\commerce_usps\USPSShipmentInterface $uspsShipment
+   * @param \Drupal\commerce_usps\USPSShipmentInterface $usps_shipment
    *   The USPS shipment object.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
-  public function __construct(USPSShipmentInterface $uspsShipment, EventDispatcherInterface $eventDispatcher) {
-    $this->uspsShipment = $uspsShipment;
-    $this->eventDispatcher = $eventDispatcher;
+  public function __construct(USPSShipmentInterface $usps_shipment, EventDispatcherInterface $event_dispatcher) {
+    $this->uspsShipment = $usps_shipment;
+    $this->eventDispatcher = $event_dispatcher;
   }
 
   /**
