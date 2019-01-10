@@ -69,17 +69,4 @@ class USPSRateRequestEvent extends Event {
     return $this->shipment;
   }
 
-  /**
-   * Sets the shipment.
-   *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $shipment
-   *   The shipment.
-   *
-   * @return $this
-   */
-  public function setShipment(ShipmentInterface $shipment) {
-    $this->shipment = $shipment;
-    return $this;
-  }
-
 }

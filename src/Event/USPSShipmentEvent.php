@@ -68,17 +68,4 @@ class USPSShipmentEvent extends Event {
     return $this->commerce_shipment;
   }
 
-  /**
-   * Sets the shipment.
-   *
-   * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
-   *   The shipment.
-   *
-   * @return $this
-   */
-  public function setShipment(ShipmentInterface $commerce_shipment) {
-    $this->commerce_shipment = $commerce_shipment;
-    return $this;
-  }
-
 }
