@@ -37,21 +37,23 @@ class USPSShipment extends USPSShipmentBase implements USPSShipmentInterface {
    * Sets the ship to for a given shipment.
    */
   protected function setShipTo() {
-    $address = $this->commerceShipment->getShippingProfile()->address;
+    /** @var \CommerceGuys\Addressing\Address $address */
+    $address = $this->commerceShipment->getShippingProfile()->get('address')->first();
     $to_address = new Address();
-    $to_address->setAddress($address->address_line1);
-    $to_address->setApt($address->address_line2);
-    $to_address->setCity($address->locality);
-    $to_address->setState($address->administrative_area);
-    $to_address->setZip5($address->postal_code);
+    $to_address->setAddress($address->getAddressLine1());
+    $to_address->setApt($address->getAddressLine2());
+    $to_address->setCity($address->getLocality());
+    $to_address->setState($address->getAdministrativeArea());
+    $to_address->setZip5($address->getPostalCode());
 
-    $this->uspsPackage->setZipDestination($address->postal_code);
+    $this->uspsPackage->setZipDestination($address->getPostalCode());
   }
 
   /**
    * Sets the ship from for a given shipment.
    */
   protected function setShipFrom() {
+    /** @var \CommerceGuys\Addressing\Address $address */
     $address = $this->commerceShipment->getOrder()->getStore()->getAddress();
     $from_address = new Address();
     $from_address->setAddress($address->getAddressLine1());
@@ -59,7 +61,6 @@ class USPSShipment extends USPSShipmentBase implements USPSShipmentInterface {
     $from_address->setState($address->getAdministrativeArea());
     $from_address->setZip5($address->getPostalCode());
     $from_address->setZip4($address->getPostalCode());
-    $from_address->setFirmName($address->getName());
 
     $this->uspsPackage->setZipOrigination($address->getPostalCode());
   }
