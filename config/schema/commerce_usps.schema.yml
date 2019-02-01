@@ -35,31 +35,3 @@ commerce_shipping.commerce_shipping_method.plugin.usps:
               mapping:
                 value:
                   label: 'API response messages'
-    conditions:
-      type: mapping
-      label: 'shipping conditions'
-      mapping:
-        conditions:
-          type: mapping
-          label: 'excluded shipping conditions'
-          mapping:
-            domestic:
-              type: field.value.boolean
-              mapping:
-                value:
-                  label: 'Domestic Shipment to Lower 48 States'
-            domestic_plus:
-              type: field.value.boolean
-              mapping:
-                value:
-                  label: 'Domestic Shipment to Alaska'
-            international_ca:
-              type: field.value.boolean
-              mapping:
-                value:
-                  label: 'International Shipment to Canada'
-            international_eu:
-              type: field.value.boolean
-              mapping:
-                value:
-                  label: 'International Shipment to Europe'
