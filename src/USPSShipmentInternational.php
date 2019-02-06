@@ -38,16 +38,18 @@ class USPSShipmentInternational extends USPSShipmentBase implements USPSShipment
    * Sets the origin zip property.
    */
   protected function setOriginZip() {
+    /** @var \CommerceGuys\Addressing\Address $address */
     $address = $this->commerceShipment->getOrder()->getStore()->getAddress();
-    $this->uspsPackage->setField('OriginZip', (int) $address->postal_code);
+    $this->uspsPackage->setField('OriginZip', (int) $address->getPostalCode());
   }
 
   /**
    * Sets the country property.
    */
   protected function setCountry() {
-    $address = $this->commerceShipment->getShippingProfile()->address;
-    $country = $this->getCountryName($address->country_code);
+    /** @var \CommerceGuys\Addressing\Address $address */
+    $address = $this->commerceShipment->getShippingProfile()->get('address')->first();
+    $country = $this->getCountryName($address->getCountryCode());
     $this->uspsPackage->setField('Country', $country);
   }
 
@@ -55,8 +57,9 @@ class USPSShipmentInternational extends USPSShipmentBase implements USPSShipment
    * Sets the destination postal code property.
    */
   protected function setDestinationPostalCode() {
-    $address = $this->commerceShipment->getShippingProfile()->address;
-    $this->uspsPackage->setField('DestinationPostalCode', $address->postal_code);
+    /** @var \CommerceGuys\Addressing\Address $address */
+    $address = $this->commerceShipment->getShippingProfile()->get('address')->first();
+    $this->uspsPackage->setField('DestinationPostalCode', $address->getPostalCode());
   }
 
   /**

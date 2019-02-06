@@ -122,7 +122,7 @@ abstract class USPSRateRequestBase extends USPSRequest implements USPSRateReques
    * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
    *   The commerce shipment entity.
    */
-  protected function setShipment(ShipmentInterface $commerce_shipment) {
+  public function setShipment(ShipmentInterface $commerce_shipment) {
     $this->commerceShipment = $commerce_shipment;
   }
 
@@ -139,7 +139,7 @@ abstract class USPSRateRequestBase extends USPSRequest implements USPSRateReques
    * @return array
    *   An array of USPS packages.
    */
-  protected function getPackages() {
+  public function getPackages() {
     // @todo: Support multiple packages.
     return [$this->uspsShipment->getPackage($this->commerceShipment)];
   }
@@ -153,7 +153,7 @@ abstract class USPSRateRequestBase extends USPSRequest implements USPSRateReques
    * @return string
    *   The cleaned up service id.
    */
-  protected function cleanServiceName($service) {
+  public function cleanServiceName($service) {
     // Remove the html encoded trademark markup since it's
     // not supported in radio labels.
     $service = str_replace('&lt;sup&gt;&#8482;&lt;/sup&gt;', '', $service);

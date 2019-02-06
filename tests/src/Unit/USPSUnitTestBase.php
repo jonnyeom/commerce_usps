@@ -30,6 +30,20 @@ abstract class USPSUnitTestBase extends UnitTestCase {
   protected $configuration;
 
   /**
+   * The USPS Rate Request class.
+   *
+   * @var \Drupal\commerce_usps\USPSRateRequest
+   */
+  protected $rateRequest;
+
+  /**
+   * The USPS shipment class.
+   *
+   * @var \Drupal\commerce_usps\USPSShipment
+   */
+  protected $uspsShipment;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -71,27 +85,17 @@ abstract class USPSUnitTestBase extends UnitTestCase {
    *   Weight measurement unit.
    * @param string $length_unit
    *   Length measurement unit.
-   * @param bool $send_form_usa
-   *   Whether the shipment should be sent from USA.
+   * @param bool $domestic
+   *   FALSE for an intenrational shipment.
    *
    * @return \Drupal\commerce_shipping\Entity\ShipmentInterface
    *   A mocked commerce shipment object.
    */
-  public function mockShipment($weight_unit = 'lb', $length_unit = 'in', $send_form_usa = TRUE) {
+  public function mockShipment($weight_unit = 'lb', $length_unit = 'in', $domestic = TRUE) {
     // Mock a Drupal Commerce Order and associated objects.
     $order = $this->prophesize(OrderInterface::class);
     $store = $this->prophesize(StoreInterface::class);
-
-    // Mock the getAddress method to return a US address.
-    if ($send_form_usa) {
-      $store->getAddress()->willReturn(new Address('US', 'NC', 'Asheville', '', 28806, '', '1025 Brevard Rd'));
-    }
-    else {
-      // Mock the address list to ship to Germany address.
-      // To those who are wondering, this is where Drupal Europe 2018 took
-      // place.
-      $store->getAddress()->willReturn(new Address('DE', '', 'Darmstadt', '', 64283, '', 'Schlossgraben 1'));
-    }
+    $store->getAddress()->willReturn(new Address('US', 'NC', 'Asheville', '', 28806, '', '1025 Brevard Rd'));
     $order->getStore()->willReturn($store->reveal());
 
     // Mock a Drupal Commerce shipment and associated objects.
@@ -100,7 +104,13 @@ abstract class USPSUnitTestBase extends UnitTestCase {
     $address_list = $this->prophesize(FieldItemListInterface::class);
 
     // Mock the address list to return a US address.
-    $address_list->first()->willReturn(new Address('US', 'CO', 'Morrison', '', 80465, '', '18300 W Alameda Pkwy'));
+    if ($domestic) {
+      $address_list->first()->willReturn(new Address('US', 'CO', 'Morrison', '', 80465, '', '18300 W Alameda Pkwy'));
+    }
+    else {
+      $address_list->first()->willReturn(new Address('GB', 'London', 'Pimlico', '', 'SW1V 3EN', '', '113 Lupus St.'));
+    }
+
     $profile->get('address')->willReturn($address_list->reveal());
     $shipment->getShippingProfile()->willReturn($profile->reveal());
     $shipment->getOrder()->willReturn($order->reveal());

@@ -10,24 +10,10 @@ use Drupal\commerce_usps\USPSRateRequest;
 /**
  * Class USPSRateRequestTest.
  *
+ * @coversDefaultClass \Drupal\commerce_usps\USPSRateRequest
  * @group commerce_usps
- * @package Drupal\Tests\commerce_usps\Unit
  */
 class USPSRateRequestTest extends USPSUnitTestBase {
-
-  /**
-   * The USPS Rate Request class.
-   *
-   * @var \Drupal\commerce_usps\USPSRateRequest
-   */
-  protected $rate_request;
-
-  /**
-   * The USPS shipment class.
-   *
-   * @var \Drupal\commerce_usps\USPSShipment
-   */
-  protected $usps_shipment;
 
   /**
    * {@inheritdoc}
@@ -40,22 +26,26 @@ class USPSRateRequestTest extends USPSUnitTestBase {
 
     // Mock all the objects and set the config.
     $event_dispatcher = new EventDispatcher();
-    $this->usps_shipment = new USPSShipment($event_dispatcher);
-    $this->rate_request = new USPSRateRequest($this->usps_shipment, $event_dispatcher);
-    $this->rate_request->setConfig($this->getConfig());
+    $this->uspsShipment = new USPSShipment($event_dispatcher);
+    $this->rateRequest = new USPSRateRequest($this->uspsShipment, $event_dispatcher);
+    $this->rateRequest->setConfig($this->getConfig());
   }
 
   /**
    * Tests getRates().
    *
-   * @throws \Exception
+   * @covers ::getRates
+   * @covers ::buildRate
+   * @covers ::setMode
+   * @covers ::setShipment
+   * @covers ::resolveRates
    */
   public function testGetRates() {
     $config = $this->getConfig();
     $shipment = $this->mockShipment();
 
     // Fetch rates from the USPS api.
-    $rates = $this->rate_request->getRates($shipment);
+    $rates = $this->rateRequest->getRates($shipment);
 
     // Make sure the same number of rates requested
     // is returned.
@@ -66,7 +56,44 @@ class USPSRateRequestTest extends USPSUnitTestBase {
       $this->assertInstanceOf(ShippingRate::class, $rate);
       $this->assertNotEmpty($rate->getAmount()->getNumber());
     }
+  }
 
+  /**
+   * Test cleaning service names.
+   *
+   * @covers ::cleanServiceName
+   */
+  public function testCleanServiceName() {
+    $service = 'Priority Mail Express 2-Day&lt;sup&gt;&#8482;&lt;/sup&gt;';
+    $cleaned = $this->rateRequest->cleanServiceName($service);
+    $this->assertEquals('Priority Mail Express 2-Day', $cleaned);
+  }
+
+  /**
+   * Test package setup.
+   *
+   * @covers ::getPackages
+   */
+  public function testGetPackages() {
+    $this->rateRequest->setShipment($this->mockShipment());
+    $packages = $this->rateRequest->getPackages();
+    // TODO: Support multiple packages.
+    /** @var \USPS\RatePackage $package */
+    $package = reset($packages);
+    $info = $package->getPackageInfo();
+    $this->assertEquals(28806, $info['ZipOrigination']);
+    $this->assertEquals(80465, $info['ZipDestination']);
+    $this->assertEquals('ALL', $info['Service']);
+    $this->assertEquals(10, $info['Pounds']);
+    $this->assertEquals(0, $info['Ounces']);
+    $this->assertEquals('VARIABLE', $info['Container']);
+    $this->assertEquals('REGULAR', $info['Size']);
+    $this->assertEquals(3, $info['Width']);
+    $this->assertEquals(10, $info['Length']);
+    $this->assertEquals(10, $info['Height']);
+    $this->assertEquals(0, $info['Girth']);
+    $this->assertEquals(TRUE, $info['Machinable']);
+    $this->assertEquals(date('Y-m-d'), $info['ShipDate']);
   }
 
 }
