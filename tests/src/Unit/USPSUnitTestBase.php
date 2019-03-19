@@ -8,7 +8,6 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\physical\Length;
 use Drupal\physical\Weight;
 use Drupal\profile\Entity\ProfileInterface;
-use Ups\Entity\PackagingType;
 use CommerceGuys\Addressing\Address;
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_shipping\Entity\ShipmentInterface;
@@ -120,7 +119,7 @@ abstract class USPSUnitTestBase extends UnitTestCase {
     $package_type->getHeight()->willReturn((new Length(10, 'in'))->convert($length_unit));
     $package_type->getLength()->willReturn((new Length(10, 'in'))->convert($length_unit));
     $package_type->getWidth()->willReturn((new Length(3, 'in'))->convert($length_unit));
-    $package_type->getRemoteId()->willReturn(PackagingType::PT_UNKNOWN);
+    $package_type->getRemoteId()->willReturn('custom');
 
     // Mock the shipments weight and package type.
     $shipment->getWeight()->willReturn((new Weight(10, 'lb'))->convert($weight_unit));
