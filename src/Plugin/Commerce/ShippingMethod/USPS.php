@@ -59,6 +59,7 @@ use Drupal\commerce_shipping\Entity\ShipmentInterface;
  *    "_62" = @translation("Priority Mail Express Padded Flat Rate Envelope"),
  *    "_63" = @translation("Priority Mail Express Padded Flat Rate Envelope Hold For Pickup"),
  *    "_64" = @translation("Priority Mail Express Sunday/Holiday Delivery Padded Flat Rate Envelope"),
+ *    "_77" = @translation("Parcel Select Ground"),
  *  }
  * )
  */
