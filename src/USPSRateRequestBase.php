@@ -64,6 +64,15 @@ abstract class USPSRateRequestBase extends USPSRequest implements USPSRateReques
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function setConfig(array $configuration) {
+    parent::setConfig($configuration);
+    // Set the configuration on the USPS Shipment service.
+    $this->uspsShipment->setConfig($configuration);
+  }
+
+  /**
    * Fetch rates from the USPS API.
    *
    * @param \Drupal\commerce_shipping\Entity\ShipmentInterface $commerce_shipment
