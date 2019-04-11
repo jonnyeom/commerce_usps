@@ -46,7 +46,8 @@ class USPSShipment extends USPSShipmentBase implements USPSShipmentInterface {
     $to_address->setState($address->getAdministrativeArea());
     $to_address->setZip5($address->getPostalCode());
 
-    $this->uspsPackage->setZipDestination($address->getPostalCode());
+    // Due to API limitations, only accept the first 5 digits of the Zip Code.
+    $this->uspsPackage->setZipDestination(substr($address->getPostalCode(), 0, 5));
   }
 
   /**
@@ -62,7 +63,8 @@ class USPSShipment extends USPSShipmentBase implements USPSShipmentInterface {
     $from_address->setZip5($address->getPostalCode());
     $from_address->setZip4($address->getPostalCode());
 
-    $this->uspsPackage->setZipOrigination($address->getPostalCode());
+    // Due to API limitations, only accept the first 5 digits of the Zip Code.
+    $this->uspsPackage->setZipOrigination(substr($address->getPostalCode(), 0, 5));
   }
 
   /**
